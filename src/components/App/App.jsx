@@ -23,6 +23,21 @@ export class App extends Component {
     filter: '',
   };
 
+  componentDidMount() {
+    const savedContacts = localStorage.getItem('contacts');
+    if (savedContacts !== null) {
+      return this.setState({ contacts: JSON.parse(savedContacts) });
+    }
+  }
+
+  componentDidUpdate(_, prevState) {
+    const { contacts } = this.state.contacts;
+    if (contacts !== prevState) {
+      localStorage.setItem('contacts', JSON.stringify(contacts));
+      return;
+    }
+  }
+
   compareContacts = nameVal => {
     const matches = this.state.contacts.filter(
       ({ name }) => !nameVal.toLowerCase().localeCompare(name.toLowerCase())
