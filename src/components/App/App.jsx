@@ -39,18 +39,22 @@ export class App extends Component {
   }
 
   compareContacts = nameVal => {
-    const matches = this.state.contacts.filter(
+    return this.state.contacts.find(
       ({ name }) => !nameVal.toLowerCase().localeCompare(name.toLowerCase())
     );
-    return matches;
+  };
+
+  filterContacts = () => {
+    return this.state.contacts.filter(({ name }) =>
+      name.toLowerCase().includes(this.state.filter.toLowerCase())
+    );
   };
 
   submitName = ({ name, number, filter }, actions) => {
     const matches = this.compareContacts(name);
-    const isPassedTest = !matches.length;
-    if (!isPassedTest) {
+    if (matches) {
       NotificationManager.warning(
-        'Сontact with name ' + matches[0].name + ' already saved'
+        'Сontact with name ' + matches.name + ' already saved'
       );
       return;
     }
@@ -68,14 +72,10 @@ export class App extends Component {
     actions.resetForm();
   };
 
-  deleteName = nameVal => {
-    const newContactsList = this.state.contacts.filter(({ name }) => {
-      if (nameVal.toLowerCase().localeCompare(name.toLowerCase()) !== 0) {
-        return true;
-      }
-      return false;
-    });
-    this.setState({ contacts: newContactsList });
+  deleteName = deletedId => {
+    this.setState(prevState => ({
+      contacts: prevState.contacts.filter(contact => contact.id !== deletedId),
+    }));
   };
 
   handleChange = e => {
@@ -83,8 +83,7 @@ export class App extends Component {
   };
 
   render() {
-    const { contacts, filter } = this.state;
-    const normalizedfilter = filter.toLowerCase();
+    const filtredContacts = this.filterContacts();
     return (
       <>
         <Section title="Phonebook">
@@ -94,8 +93,7 @@ export class App extends Component {
         <Section title="Contacts">
           <Filter handleChange={this.handleChange}></Filter>
           <Contacts
-            contactList={contacts}
-            query={normalizedfilter}
+            contactList={filtredContacts}
             deleteName={this.deleteName}
           ></Contacts>
         </Section>
